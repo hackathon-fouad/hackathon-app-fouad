@@ -10,3 +10,6 @@ services:
     command: sleep infinity
     volumes:
       - .:/workspace:cached
+
+
+      echo "# hackathon-app-fouad" >> README.md
