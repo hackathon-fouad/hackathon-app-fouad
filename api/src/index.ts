@@ -63,3 +63,4 @@ async function ask(question: string): Promise<string> {
 
 // Sans adresse, Node écoute sur toutes les interfaces : joignable hors du conteneur
 app.listen(PORT, () => console.log(`API sur http://localhost:${PORT}`));
+//fjdsfsdnnfsjkfn
