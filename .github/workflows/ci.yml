@@ -20,8 +20,15 @@ jobs:
 
       - run: npm ci
 
-      - name: Vérifier les types de l'API
-        run: npx -w api tsc --noEmit
+      - name: Lint
+        run: npm run lint
+
+      - name: Vérifier les types de l'API et du front
+        run: npm run typecheck
+
+      # Échoue seulement sur les failles graves des dépendances de production
+      - name: Audit de sécurité
+        run: npm audit --omit=dev --audit-level=high
 
       - name: Construire le front
         run: npm run build -w web
