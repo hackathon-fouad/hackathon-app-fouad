@@ -8,9 +8,15 @@
   ],
   "scripts": {
     "dev": "concurrently -n api,web \"npm run dev -w api\" \"npm run dev -w web\"",
-    "build": "npm run build --workspaces"
+    "build": "npm run build --workspaces",
+    "lint": "eslint .",
+    "typecheck": "npm run typecheck --workspaces"
   },
   "devDependencies": {
-    "concurrently": "^10.0.7"
+    "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.7",
+    "eslint": "^10.14.0",
+    "globals": "^17.14.0",
+    "typescript-eslint": "^8.72.2"
   }
 }
