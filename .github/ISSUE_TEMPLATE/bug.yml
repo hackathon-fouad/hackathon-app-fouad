@@ -1,0 +1,48 @@
+name: Bug
+description: Quelque chose qui ne marche pas comme prévu
+title: "fix: "
+labels: [bug]
+body:
+  - type: textarea
+    id: constat
+    attributes:
+      label: Ce qui se passe
+      description: Le comportement observé, avec le message d'erreur exact.
+      placeholder: POST /api/questions renvoie une page HTML d'erreur quand Ollama est arrêté.
+    validations:
+      required: true
+  - type: textarea
+    id: attendu
+    attributes:
+      label: Ce qui est attendu
+      placeholder: 'Une réponse JSON { "error": "..." }, comme décrit dans openapi.yaml.'
+    validations:
+      required: true
+  - type: textarea
+    id: etapes
+    attributes:
+      label: Étapes pour reproduire
+      placeholder: |
+        1. Arrêter Ollama
+        2. Poser une question depuis http://localhost:5173
+    validations:
+      required: true
+  - type: dropdown
+    id: zone
+    attributes:
+      label: Zone
+      multiple: true
+      options:
+        - api
+        - front
+        - db
+        - ia
+        - infra
+    validations:
+      required: true
+  - type: input
+    id: environnement
+    attributes:
+      label: Environnement
+      description: Dev Container, CI, ou autre. Précise le fournisseur d'IA si l'IA est en cause.
+      placeholder: Dev Container, Ollama sur l'hôte, llama3.2:1b
