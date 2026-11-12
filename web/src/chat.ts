@@ -1,4 +1,5 @@
 import { createElement, Sparkles } from 'lucide';
+import { navigate, prospectsHash } from './router';
 
 // Le chat avec le copilote (issue #20). Le copilote répond d'un bloc, en 25 secondes
 // environ : pas d'affichage mot par mot simulé, mais une bulle d'attente.
@@ -10,6 +11,7 @@ type Entry =
   | { role: 'user'; content: string }
   | { role: 'assistant'; content: string }
   | { role: 'pending' }
+  | { role: 'results'; href: string; limit: number }
   | { role: 'error'; question: string };
 
 // Le copilote ne lit que les derniers échanges : inutile d'envoyer toute la conversation
@@ -70,6 +72,21 @@ function renderEntry(entry: Entry): HTMLLIElement {
     bubble.className =
       'rounded-card bg-panel px-4 py-3 text-sm whitespace-pre-line';
     bubble.textContent = entry.content;
+    return assistantRow(bubble);
+  }
+
+  if (entry.role === 'results') {
+    // Trace dans la conversation d'une recherche de prospects (issue #31)
+    bubble.className =
+      'flex flex-wrap items-center gap-3 rounded-card bg-panel px-4 py-3 text-sm';
+    const text = document.createElement('span');
+    text.textContent = `Voici ma sélection de ${entry.limit} marques prometteuses.`;
+    const link = document.createElement('a');
+    link.href = entry.href;
+    link.className =
+      'rounded-control font-semibold text-primary underline hover:text-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none';
+    link.textContent = 'Voir les résultats';
+    bubble.append(text, link);
     return assistantRow(bubble);
   }
 
@@ -143,12 +160,46 @@ async function ask(question: string) {
   }
 }
 
-function reset() {
+// Demande de prospection : un verbe de recherche suivi de marques, prospects ou
+// entreprises (« Trouve-moi 9 marques… »). Simple détection par mots-clés.
+const PROSPECT_REQUEST =
+  /\b(trouve|cherche|recherche|liste|donne|propose|identifie|suggere)\b.*\b(marques?|prospects?|entreprises?)\b/;
+
+export function prospectRequest(
+  question: string,
+): { query: string; limit: number } | null {
+  const text = question
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+  if (!PROSPECT_REQUEST.test(text)) return null;
+  const count = Number(text.match(/\b(\d{1,2})\b/)?.[1]);
+  const limit = count >= 1 && count <= 50 ? count : 9;
+  return { query: question, limit };
+}
+
+function showResults(question: string, request: { query: string; limit: number }) {
+  const href = prospectsHash(request.query, request.limit);
+  setMode('chat');
+  entries.push(
+    { role: 'user', content: question },
+    { role: 'results', href, limit: request.limit },
+  );
+  render();
+  navigate(href);
+}
+
+export function resetChat() {
   entries = [];
   turns = [];
   log.replaceChildren();
   setMode('home');
   form.reset();
+}
+
+function newConversation() {
+  resetChat();
+  navigate('#/');
   textarea.focus();
 }
 
@@ -166,8 +217,10 @@ export function initChat() {
     const question = textarea.value.trim();
     if (!question || busy) return;
     form.reset();
-    void ask(question);
+    const request = prospectRequest(question);
+    if (request) showResults(question, request);
+    else void ask(question);
   });
 
-  newChat.addEventListener('click', reset);
+  newChat.addEventListener('click', newConversation);
 }
