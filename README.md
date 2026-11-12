@@ -39,3 +39,5 @@ Pour repartir d'une base vide, supprimer `db/data/` puis reconstruire le contene
 ## Contribuer
 
 Les branches partent de `develop` et y reviennent par pull request. Le job `qualite` de la CI doit être vert avant la fusion. Il lance le lint, vérifie les types de l'API et du front, audite les failles graves des dépendances, puis construit le front. En local, les mêmes vérifications se lancent avec `npm run lint` et `npm run typecheck`.
+
+Avant chaque commit, un hook `pre-commit` (husky et lint-staged) lance ESLint sur les fichiers `.ts` et `.js` modifiés et refuse le commit en cas d'erreur. Il s'installe tout seul avec `npm install`.

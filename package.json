@@ -10,13 +10,19 @@
     "dev": "concurrently -n api,web \"npm run dev -w api\" \"npm run dev -w web\"",
     "build": "npm run build --workspaces",
     "lint": "eslint .",
-    "typecheck": "npm run typecheck --workspaces"
+    "typecheck": "npm run typecheck --workspaces",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "concurrently": "^10.0.7",
     "eslint": "^10.14.0",
     "globals": "^17.14.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.6.0",
     "typescript-eslint": "^8.72.2"
+  },
+  "lint-staged": {
+    "*.{ts,js}": "eslint"
   }
 }
