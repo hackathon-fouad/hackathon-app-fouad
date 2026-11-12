@@ -3,30 +3,179 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hackathon</title>
+    <title>Givaudan · Nouveau chat</title>
   </head>
-  <body class="min-h-screen bg-background font-sans text-text">
-    <main class="mx-auto flex max-w-2xl flex-col gap-6 px-4 py-10">
-      <header class="flex flex-col gap-1">
-        <h1 class="text-2xl font-semibold">Hackathon</h1>
-        <p id="health" class="truncate text-sm text-muted">Connexion à l'API…</p>
+  <body class="flex h-screen bg-background font-sans text-text">
+    <!-- Barre latérale. data-collapsed passe à true pour la rétracter en colonne d'icônes.
+         Seul « Accueil » est actif : le reste est une maquette (issue #19). -->
+    <aside
+      id="sidebar"
+      data-collapsed="false"
+      class="group flex w-64 shrink-0 flex-col gap-6 overflow-hidden bg-sidebar p-4 transition-all data-[collapsed=true]:w-16"
+    >
+      <div class="flex items-center justify-between gap-2">
+        <span class="text-xl font-semibold group-data-[collapsed=true]:hidden">Givaudan</span>
+        <button
+          id="sidebar-toggle"
+          type="button"
+          aria-controls="sidebar"
+          aria-expanded="true"
+          aria-label="Rétracter la barre latérale"
+          class="rounded-control p-1 hover:bg-header focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none"
+        >
+          <i data-lucide="panel-left-close" class="size-5 group-data-[collapsed=true]:hidden"></i>
+          <i data-lucide="panel-left-open" class="hidden size-5 group-data-[collapsed=true]:block"></i>
+        </button>
+      </div>
+
+      <label
+        title="Bientôt disponible"
+        class="flex cursor-not-allowed items-center gap-3 rounded-control bg-surface px-3 py-2 group-data-[collapsed=true]:bg-transparent group-data-[collapsed=true]:px-0.5"
+      >
+        <i data-lucide="search" class="size-5 shrink-0"></i>
+        <input
+          type="search"
+          placeholder="Search"
+          disabled
+          class="w-full cursor-not-allowed bg-transparent text-sm outline-none placeholder:text-text group-data-[collapsed=true]:hidden"
+        />
+      </label>
+
+      <nav aria-label="Navigation principale" class="flex flex-col gap-1">
+        <a
+          href="/"
+          aria-current="page"
+          class="flex items-center gap-3 rounded-control px-0.5 py-2 text-sm font-medium"
+        >
+          <i data-lucide="house" class="size-5 shrink-0"></i>
+          <span class="group-data-[collapsed=true]:hidden">Accueil</span>
+        </a>
+        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-0.5 py-2 text-sm">
+          <i data-lucide="globe" class="size-5 shrink-0"></i>
+          <span class="group-data-[collapsed=true]:hidden">Mes clients</span>
+        </button>
+        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-0.5 py-2 text-sm">
+          <i data-lucide="scan-eye" class="size-5 shrink-0"></i>
+          <span class="group-data-[collapsed=true]:hidden">Insights</span>
+        </button>
+        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-0.5 py-2 text-sm">
+          <i data-lucide="lightbulb" class="size-5 shrink-0"></i>
+          <span class="group-data-[collapsed=true]:hidden">Solutions</span>
+        </button>
+      </nav>
+
+      <hr class="border-border" />
+
+      <ul aria-label="Catégories" class="flex flex-col gap-1">
+        <li title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-1 py-2 text-sm">
+          <span class="size-3 shrink-0 rounded-full bg-primary"></span>
+          <span class="group-data-[collapsed=true]:hidden">Favorites</span>
+        </li>
+        <li title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-1 py-2 text-sm">
+          <span class="size-3 shrink-0 rounded-full bg-primary"></span>
+          <span class="group-data-[collapsed=true]:hidden">Code</span>
+        </li>
+        <li title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-1 py-2 text-sm">
+          <span class="size-3 shrink-0 rounded-full bg-primary"></span>
+          <span class="group-data-[collapsed=true]:hidden">Marketing</span>
+        </li>
+        <li title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-1 py-2 text-sm">
+          <span class="size-3 shrink-0 rounded-full bg-primary"></span>
+          <span class="group-data-[collapsed=true]:hidden">Archive</span>
+        </li>
+        <li title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-1 py-2 text-sm">
+          <span class="size-3 shrink-0 rounded-full bg-primary"></span>
+          <span class="group-data-[collapsed=true]:hidden">Deleted</span>
+        </li>
+      </ul>
+
+      <div class="mt-auto flex flex-col gap-4">
+        <hr class="border-border" />
+        <div class="flex items-center gap-3">
+          <span
+            aria-hidden="true"
+            class="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-semibold text-on-primary"
+            >JD</span
+          >
+          <div class="min-w-0 group-data-[collapsed=true]:hidden">
+            <p class="truncate text-sm font-semibold">Jordan Dubois</p>
+            <p class="truncate text-xs text-muted">j.dubois@exemple.com</p>
+          </div>
+        </div>
+        <p id="health" class="flex items-center gap-2 text-xs text-muted">
+          <span id="health-dot" class="size-2 shrink-0 rounded-full bg-muted"></span>
+          <span id="health-text" class="truncate group-data-[collapsed=true]:hidden">Connexion à l'API…</span>
+        </p>
+      </div>
+    </aside>
+
+    <main class="flex min-w-0 flex-1 flex-col">
+      <header class="flex items-center justify-between gap-4 bg-header px-6 py-5 md:px-12">
+        <h1 class="text-xl font-semibold">Nouveau chat</h1>
+        <button
+          type="button"
+          aria-disabled="true"
+          title="Bientôt disponible"
+          class="flex cursor-not-allowed items-center gap-2 rounded-control bg-surface px-4 py-2 text-sm font-semibold"
+        >
+          <i data-lucide="square-pen" class="size-4"></i>
+          Nouveau chat
+        </button>
       </header>
 
-      <form class="flex gap-2">
-        <input
-          name="question"
-          placeholder="Posez une question à l'IA"
-          required
-          class="flex-1 rounded-control border border-border bg-surface px-3 py-2 outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/30"
-        />
-        <button
-          class="rounded-control bg-primary px-4 py-2 font-medium text-on-primary hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:outline-none"
-        >
-          Envoyer
-        </button>
-      </form>
+      <div class="flex-1 overflow-y-auto px-6 py-12 md:px-12">
+        <div class="mx-auto flex max-w-4xl flex-col gap-10">
+          <section class="flex flex-col items-center gap-4 text-center">
+            <h2 class="text-4xl font-bold">Hello Jordan !</h2>
+            <p class="max-w-sm text-sm">
+              <strong class="font-semibold">Posez vos questions,</strong> explorez les possibilités et
+              accédez instantanément aux insights, le tout à partir d'un simple prompt.
+            </p>
+          </section>
 
-      <ul id="questions" class="flex flex-col gap-3"></ul>
+          <form class="flex flex-col gap-4 rounded-card bg-panel p-5">
+            <p class="flex items-center gap-2 text-sm font-semibold">
+              <i data-lucide="messages-square" class="size-5"></i>
+              Commencer le chat
+            </p>
+            <div class="flex flex-col gap-4 rounded-card bg-surface p-5">
+              <label for="question" class="sr-only">Votre question</label>
+              <textarea
+                id="question"
+                name="question"
+                rows="5"
+                required
+                placeholder="Comment est-ce que l'IA peut vous aider aujourd'hui ?"
+                class="w-full resize-none bg-transparent text-sm outline-none placeholder:text-text"
+              ></textarea>
+              <hr class="border-border" />
+              <div class="flex flex-wrap items-center gap-3">
+                <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
+                  <i data-lucide="paperclip" class="size-4"></i>
+                  Attach
+                </button>
+                <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
+                  <i data-lucide="mic" class="size-4"></i>
+                  Message vocal
+                </button>
+                <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
+                  <i data-lucide="book-open" class="size-4"></i>
+                  Bibliothèque prompts
+                </button>
+                <button
+                  type="submit"
+                  class="ml-auto flex items-center gap-2 rounded-control bg-primary px-5 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
+                >
+                  <i data-lucide="send-horizontal" class="size-4"></i>
+                  Go
+                </button>
+              </div>
+            </div>
+          </form>
+
+          <ul id="questions" aria-label="Dernières questions" class="flex flex-col gap-3"></ul>
+        </div>
+      </div>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>
