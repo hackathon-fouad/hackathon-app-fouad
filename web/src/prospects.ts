@@ -16,9 +16,11 @@ const grid = document.querySelector('#prospects-grid')!;
 
 // Évite de relancer la même recherche quand on revient sur l'écran
 let shownKey = '';
+// Adresse de la dernière grille affichée : le bouton Retour de la fiche y ramène
+export let lastResultsHash = '';
 
 // « Maison Alizé » → « MA », « Bulle d'Écume » → « BÉ », « Ondine & Sel » → « OS »
-function initials(name: string): string {
+export function initials(name: string): string {
   return name
     .split(/\s+/)
     .map((word) => word.replace(/^[a-z]'/i, ''))
@@ -60,13 +62,11 @@ function card(prospect: ProspectSummary): HTMLLIElement {
   city.textContent = `${prospect.ville} : `;
   text.append(city, capitalize(prospect.accroche));
 
-  // La fiche détaillée arrive avec l'écran « Pourquoi cette entreprise ? »
-  const consult = document.createElement('button');
-  consult.type = 'button';
-  consult.setAttribute('aria-disabled', 'true');
-  consult.title = 'Bientôt disponible';
+  // Ouvre l'écran « Pourquoi cette entreprise ? » (issue #33)
+  const consult = document.createElement('a');
+  consult.href = `#/prospects/${encodeURIComponent(prospect.id)}`;
   consult.className =
-    'mt-auto cursor-not-allowed rounded-control bg-primary px-5 py-2 text-sm font-semibold text-on-primary';
+    'mt-auto rounded-control bg-primary px-5 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none';
   consult.textContent = 'Consulter';
   consult.setAttribute('aria-label', `Consulter ${prospect.nom}`);
 
@@ -99,6 +99,7 @@ function showError(retry: () => void) {
 }
 
 export async function showProspects({ query, limit }: { query: string; limit: number }) {
+  lastResultsHash = location.hash;
   const key = `${limit}|${query}`;
   if (key === shownKey) return;
   shownKey = key;
