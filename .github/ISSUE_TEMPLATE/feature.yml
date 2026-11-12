@@ -1,0 +1,51 @@
+name: Fonctionnalité
+description: Une fonctionnalité visible par l'utilisateur ou une nouvelle route d'API
+title: "feat: "
+labels: [feature]
+body:
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Contexte
+      description: Le besoin et pourquoi maintenant. Des faits, pas des opinions.
+      placeholder: Pour m2, docker compose up seul doit démarrer l'écran, l'API et la base.
+    validations:
+      required: true
+  - type: textarea
+    id: a-faire
+    attributes:
+      label: À faire
+      description: Les tâches concrètes, avec les fichiers concernés.
+      placeholder: |
+        - [ ] Ajouter un service api dans compose.yaml
+        - [ ] Mettre à jour openapi.yaml si une route change
+    validations:
+      required: true
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères d'acceptation
+      description: Comment vérifier que c'est fini. Chaque critère doit pouvoir se tester.
+      placeholder: |
+        - [ ] Une question posée depuis la page apparaît dans la table questions
+    validations:
+      required: true
+  - type: dropdown
+    id: zone
+    attributes:
+      label: Zone
+      multiple: true
+      options:
+        - api
+        - front
+        - db
+        - ia
+        - infra
+    validations:
+      required: true
+  - type: input
+    id: adr
+    attributes:
+      label: ADR concerné
+      description: Si la tâche touche une décision de docs/adr/, cite-la. Si elle la contredit, il faut un nouvel ADR.
+      placeholder: ADR 0004

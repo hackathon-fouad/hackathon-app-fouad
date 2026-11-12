@@ -1,8 +1,59 @@
-# La stack de développement. Versions figées : les mêmes qu'en production.
+# La stack complète. `docker compose up` lance l'écran, l'API, l'IA et la base.
+# Versions figées : les mêmes qu'en production.
 name: hackathon
 
 services:
-  # Le poste de travail : VS Code s'y attache, on y lance l'API et le front
+  # Le front construit, servi par nginx, qui relaie /api vers l'API
+  web:
+    build:
+      context: .
+      dockerfile: web/Dockerfile
+    ports:
+      - "8080:80"
+    depends_on:
+      - api
+
+  api:
+    build:
+      context: .
+      dockerfile: api/Dockerfile
+    # api/.env n'est pas commité : la configuration vient d'ici. Pour un autre
+    # fournisseur d'IA, définir AI_BASE_URL, AI_MODEL et AI_API_KEY dans le shell
+    # ou dans un fichier .env à la racine (ADR 0003).
+    environment:
+      DATABASE_URL: postgres://app:app@db:5432/app
+      AI_BASE_URL: ${AI_BASE_URL:-http://ollama:11434/v1}
+      AI_MODEL: ${AI_MODEL:-llama3.2:1b}
+      AI_API_KEY: ${AI_API_KEY:-}
+    depends_on:
+      db:
+        condition: service_healthy
+      ollama-pull:
+        condition: service_completed_successfully
+
+  # L'IA en local, sans clé ni quota. Les modèles restent dans le volume ollama.
+  ollama:
+    image: ollama/ollama:0.40.16
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # Télécharge le modèle au premier lancement (environ 1,3 Go), puis s'arrête.
+  # Les lancements suivants le trouvent déjà dans le volume.
+  ollama-pull:
+    image: ollama/ollama:0.40.16
+    environment:
+      OLLAMA_HOST: ollama:11434
+    command: ["pull", "${AI_MODEL:-llama3.2:1b}"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  # Le poste de travail : VS Code s'y attache, on y lance l'API et le front en dev
   dev:
     build:
       context: .
@@ -10,3 +61,29 @@ services:
     command: sleep infinity
     volumes:
       - .:/workspace:cached
+    extra_hosts:
+      # Rend l'hôte joignable sous Linux (Docker Desktop le fait déjà)
+      - host.docker.internal:host-gateway
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: app
+      POSTGRES_PASSWORD: app
+      POSTGRES_DB: app
+    volumes:
+      # Les données, dans un dossier du projet (ignoré par git)
+      - ./db/data:/var/lib/postgresql/data
+      # Schéma et données de test, joués au premier démarrage
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U app -d app"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  ollama:

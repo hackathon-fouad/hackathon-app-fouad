@@ -1,0 +1,7 @@
+# Les images s'installent avec npm ci : rien de la machine hôte n'y entre
+**/node_modules
+**/dist
+db/data
+.git
+# Jamais de secret dans une image
+**/.env

@@ -1,0 +1,122 @@
+# Contrat de l'API. Toute route ajoutée ou modifiée dans api/src/ doit l'être ici aussi.
+# Décision : docs/adr/0005-contrat-openapi.md
+openapi: 3.1.0
+info:
+  title: API Hackathon, questions à l'IA
+  version: 0.1.0
+  description: >
+    Le front envoie une question, l'API la soumet à un modèle compatible OpenAI
+    puis enregistre la question et la réponse dans PostgreSQL.
+servers:
+  - url: http://localhost:3000
+    description: API lancée dans le Dev Container
+# Aucune authentification pour l'instant : toutes les routes sont publiques
+security: []
+paths:
+  /api/health:
+    get:
+      summary: État de l'API et de la base
+      operationId: getHealth
+      responses:
+        '200':
+          description: L'API répond et la base est joignable.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '500':
+          $ref: '#/components/responses/ServerError'
+  /api/questions:
+    get:
+      summary: Les dix dernières questions, de la plus récente à la plus ancienne
+      operationId: listQuestions
+      responses:
+        '200':
+          description: Liste d'au plus dix questions.
+          content:
+            application/json:
+              schema:
+                type: array
+                maxItems: 10
+                items:
+                  $ref: '#/components/schemas/Question'
+        '500':
+          $ref: '#/components/responses/ServerError'
+    post:
+      summary: Pose une question à l'IA et enregistre la réponse
+      operationId: askQuestion
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NewQuestion'
+      responses:
+        '201':
+          description: La question et la réponse de l'IA, telles qu'enregistrées.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Question'
+        '400':
+          description: Question absente ou vide après suppression des espaces.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Question manquante
+        '500':
+          $ref: '#/components/responses/ServerError'
+components:
+  schemas:
+    Health:
+      type: object
+      required: [status, db]
+      properties:
+        status:
+          type: string
+          const: ok
+        db:
+          type: string
+          description: Résultat de `SELECT version()` sur PostgreSQL.
+          example: PostgreSQL 17.6 (Debian 17.6-1.pgdg13+1) on x86_64-pc-linux-gnu
+    NewQuestion:
+      type: object
+      required: [question]
+      properties:
+        question:
+          type: string
+          minLength: 1
+          example: Quelle est la capitale de la France ?
+    Question:
+      type: object
+      required: [id, question, answer, created_at]
+      properties:
+        id:
+          type: integer
+          example: 1
+        question:
+          type: string
+          example: Quelle est la capitale de la France ?
+        answer:
+          type: string
+          example: Paris.
+        created_at:
+          type: string
+          format: date-time
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+  responses:
+    ServerError:
+      description: >
+        Erreur de la base ou du fournisseur d'IA. Express renvoie sa page
+        d'erreur par défaut : le format n'est pas encore du JSON.
+      content:
+        text/html:
+          schema:
+            type: string

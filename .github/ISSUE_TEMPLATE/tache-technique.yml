@@ -1,0 +1,40 @@
+name: Tâche technique
+description: Documentation, ADR, CI, Dev Container, outillage. Rien de visible par l'utilisateur.
+title: "chore: "
+labels: [chore]
+body:
+  - type: dropdown
+    id: type
+    attributes:
+      label: Type
+      options:
+        - docs (README, ADR, AGENTS.md, openapi.yaml)
+        - chore (CI, Dev Container, dépendances, outillage)
+    validations:
+      required: true
+  - type: textarea
+    id: contexte
+    attributes:
+      label: Contexte
+      description: Le problème ou l'exigence à l'origine de la tâche.
+      placeholder: Le jalon m1 exige un fichier OpenAPI dans le dépôt et un ADR qui le cite.
+    validations:
+      required: true
+  - type: textarea
+    id: a-faire
+    attributes:
+      label: À faire
+      placeholder: |
+        - [ ] Écrire openapi.yaml à la racine
+        - [ ] Écrire l'ADR qui le cite
+    validations:
+      required: true
+  - type: textarea
+    id: criteres
+    attributes:
+      label: Critères d'acceptation
+      placeholder: |
+        - [ ] Le job qualite est vert
+        - [ ] Le fichier est fusionné dans develop
+    validations:
+      required: true

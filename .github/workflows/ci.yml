@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+jobs:
+  qualite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Même version de Node que le Dev Container et la production
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Vérifier les types de l'API et du front
+        run: npm run typecheck
+
+      # Échoue seulement sur les failles graves des dépendances de production
+      - name: Audit de sécurité
+        run: npm audit --omit=dev --audit-level=high
+
+      - name: Construire le front
+        run: npm run build -w web
