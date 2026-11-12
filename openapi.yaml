@@ -75,8 +75,187 @@ paths:
                     error: Historique invalide
         '500':
           $ref: '#/components/responses/ServerError'
+  /api/prospects/search:
+    post:
+      summary: Prospects cosmétiques classés par score, relayés depuis le copilote
+      description: >
+        Le score est calculé en Python par le copilote, jamais par l'IA : le résultat
+        est le même à chaque appel. La recherche ne filtre que si elle nomme un segment
+        (bébé, solaire, homme, recharge…).
+      operationId: searchProspects
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProspectSearch'
+      responses:
+        '200':
+          description: Prospects triés du meilleur score au moins bon.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProspectSearchResult'
+        '400':
+          description: Recherche de plus de 500 caractères, ou limite hors de 1 à 50.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '502':
+          $ref: '#/components/responses/CopilotUnavailable'
+  /api/prospects/{id}:
+    get:
+      summary: Fiche détaillée d'un prospect, relayée depuis le copilote
+      operationId: getProspect
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Nom sans accents, en minuscules, avec des tirets.
+          schema:
+            type: string
+            pattern: '^[a-z0-9-]{1,100}$'
+          example: maison-alize
+      responses:
+        '200':
+          description: La fiche du prospect.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prospect'
+        '400':
+          description: Identifiant mal formé.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Aucun prospect avec cet identifiant.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error: Prospect introuvable
+        '502':
+          $ref: '#/components/responses/CopilotUnavailable'
 components:
   schemas:
+    ProspectSearch:
+      type: object
+      properties:
+        query:
+          type: string
+          maxLength: 500
+          example: Trouve-moi 9 marques de cosmétiques françaises qui pourraient avoir besoin de développer de nouvelles fragrances
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+          example: 9
+    ProspectSearchResult:
+      type: object
+      required: [query, total, prospects]
+      properties:
+        query:
+          type: string
+        total:
+          type: integer
+          description: Nombre de prospects correspondants, avant la limite.
+        prospects:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProspectSummary'
+    ProspectSummary:
+      type: object
+      required: [id, nom, ville, score, rang, accroche]
+      properties:
+        id:
+          type: string
+          example: maison-alize
+        nom:
+          type: string
+          example: Maison Alizé
+        ville:
+          type: string
+          example: Montpellier
+        score:
+          type: number
+          description: Sur 100.
+          example: 95
+        rang:
+          type: integer
+          example: 1
+        accroche:
+          type: string
+          example: lancement récent d'une gamme bien-être « Rituels du soir ».
+    Prospect:
+      allOf:
+        - $ref: '#/components/schemas/ProspectSummary'
+        - type: object
+          required: [identite, signaux, pourquoi_cette_entreprise, produits_adaptes, codes_produits, contact, prochaine_etape]
+          properties:
+            score_maximum:
+              type: number
+              example: 100
+            identite:
+              type: string
+            signaux:
+              type: string
+              description: Annonces, recrutements, insatisfactions repérés.
+            pourquoi_cette_entreprise:
+              type: string
+            produits_adaptes:
+              type: string
+            codes_produits:
+              type: array
+              items:
+                type: string
+              example: [FB-140]
+            contact:
+              type: object
+              properties:
+                nom:
+                  type: string
+                role:
+                  type: string
+                texte:
+                  type: string
+            profil_digital_twin:
+              type: string
+            details_score:
+              type: array
+              items:
+                type: object
+                properties:
+                  critere:
+                    type: string
+                  libelle:
+                    type: string
+                  points:
+                    type: number
+                  maximum:
+                    type: number
+                  commentaire:
+                    type: string
+            points_manquants:
+              type: array
+              items:
+                type: object
+                properties:
+                  critere:
+                    type: string
+                  libelle:
+                    type: string
+                  manque:
+                    type: number
+            prochaine_etape:
+              type: string
+            anomalies_score:
+              type: array
+              items: {}
     Health:
       type: object
       required: [status, db]
@@ -138,6 +317,14 @@ components:
         error:
           type: string
   responses:
+    CopilotUnavailable:
+      description: Le copilote est injoignable ou a renvoyé une erreur.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: Copilote indisponible
     ServerError:
       description: >
         Erreur de la base ou du copilote IA. Express renvoie sa page
