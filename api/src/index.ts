@@ -67,6 +67,103 @@ app.post('/api/questions', async (req, res) => {
   res.status(201).json(rows[0]);
 });
 
+// Prospection (issue #29) : le copilote classe les prospects par un score calculé en
+// Python, sans IA. On relaie ses réponses, avec score et rang en nombres.
+
+class CopilotError extends Error {
+  constructor(readonly status: number) {
+    super(`Copilote : ${status}`);
+  }
+}
+
+async function copilot<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(`${COPILOT_URL}${path}`, init);
+  } catch {
+    throw new CopilotError(502);
+  }
+  if (!response.ok) throw new CopilotError(response.status);
+  return (await response.json()) as T;
+}
+
+function sendCopilotError(res: express.Response, error: unknown, notFound: string) {
+  if (error instanceof CopilotError && error.status === 404) {
+    res.status(404).json({ error: notFound });
+    return;
+  }
+  res.status(502).json({ error: 'Copilote indisponible' });
+}
+
+type ProspectSummary = {
+  id: string;
+  nom: string;
+  ville: string;
+  score: string | number;
+  rang: string | number;
+  accroche: string;
+};
+
+const toNumber = (value: string | number | null) =>
+  value === null ? null : Number(value);
+
+app.post('/api/prospects/search', async (req, res) => {
+  const query = String(req.body?.query ?? '').trim();
+  const limit = req.body?.limit ?? 10;
+  if (query.length > 500) {
+    res.status(400).json({ error: 'Recherche trop longue' });
+    return;
+  }
+  if (!Number.isInteger(limit) || limit < 1 || limit > 50) {
+    res.status(400).json({ error: 'Limite invalide' });
+    return;
+  }
+  try {
+    const data = await copilot<{ total: number; prospects: ProspectSummary[] }>(
+      '/prospects/search',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query, limit }),
+      },
+    );
+    res.json({
+      query,
+      total: data.total,
+      prospects: data.prospects.map((p) => ({
+        ...p,
+        score: toNumber(p.score),
+        rang: toNumber(p.rang),
+      })),
+    });
+  } catch (error) {
+    sendCopilotError(res, error, 'Recherche introuvable');
+  }
+});
+
+// Identifiant du copilote : nom sans accents, en minuscules, avec des tirets
+const PROSPECT_ID = /^[a-z0-9-]{1,100}$/;
+
+app.get('/api/prospects/:id', async (req, res) => {
+  const { id } = req.params;
+  if (!PROSPECT_ID.test(id)) {
+    res.status(400).json({ error: 'Identifiant invalide' });
+    return;
+  }
+  try {
+    const prospect = await copilot<Record<string, unknown>>(
+      `/prospects/${encodeURIComponent(id)}`,
+    );
+    res.json({
+      ...prospect,
+      score: toNumber(prospect.score as string | null),
+      rang: toNumber(prospect.rang as string | null),
+    });
+  } catch (error) {
+    sendCopilotError(res, error, 'Prospect introuvable');
+  }
+});
+
 // Le copilote de l'équipe data répond à partir de ses documents (ADR 0007).
 // Appel de serveur à serveur : le navigateur ne le voit pas, pas de CORS.
 // L'historique lui permet de comprendre « Et pour Solenza ? » après une autre question.
