@@ -6,6 +6,8 @@
     "moduleResolution": "bundler",
     "lib": ["es2023", "dom", "dom.iterable"],
     "noEmit": true,
+    // Types de Vite : import de fichiers CSS, import.meta.env
+    "types": ["vite/client"],
     "strict": true,
     "skipLibCheck": true
   },
