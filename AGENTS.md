@@ -22,6 +22,8 @@ npm run build -w web   # build Vite du front
 
 Avant de proposer une modification, `npm run lint` et `npm run typecheck` doivent passer : le job `qualite` de `.github/workflows/ci.yml` lance les mêmes commandes.
 
+Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` de `package.json`) lance ESLint sur les fichiers indexés. Corrige l'erreur signalée au lieu de le contourner avec `--no-verify`.
+
 ## Organisation du code
 
 - `api/src/index.ts` : l'API Express, les requêtes SQL avec `pg` et l'appel à l'IA (`ask()`).
