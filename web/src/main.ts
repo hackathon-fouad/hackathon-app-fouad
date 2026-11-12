@@ -14,9 +14,8 @@ import {
   Search,
   Sparkles,
 } from 'lucide';
+import { initChat } from './chat';
 import './style.css';
-
-type Question = { id: number; question: string; answer: string };
 
 // Remplace chaque <i data-lucide="…"> par son icône SVG, au trait fin comme la maquette
 createIcons({
@@ -38,9 +37,6 @@ const sidebar = document.querySelector<HTMLElement>('#sidebar')!;
 const toggle = document.querySelector<HTMLButtonElement>('#sidebar-toggle')!;
 const healthDot = document.querySelector('#health-dot')!;
 const healthText = document.querySelector('#health-text')!;
-const form = document.querySelector('form')!;
-const textarea = document.querySelector<HTMLTextAreaElement>('#question')!;
-const list = document.querySelector('#questions')!;
 
 // Barre latérale rétractable. L'état est mémorisé dans le navigateur ;
 // sans préférence enregistrée, elle démarre rétractée sur petit écran.
@@ -76,7 +72,7 @@ toggle.addEventListener('click', () =>
   setCollapsed(sidebar.dataset.collapsed !== 'true'),
 );
 
-async function refresh() {
+async function checkHealth() {
   try {
     const status = await fetch('/api/health').then((r) => r.json());
     healthDot.classList.replace('bg-on-sidebar/50', 'bg-success');
@@ -85,45 +81,7 @@ async function refresh() {
   } catch {
     healthText.textContent = 'API injoignable';
   }
-
-  const questions: Question[] = await fetch('/api/questions').then((r) =>
-    r.json(),
-  );
-  list.replaceChildren(
-    ...questions.map((q) => {
-      const item = document.createElement('li');
-      item.className =
-        'flex flex-col gap-1 rounded-card border border-border bg-surface p-4';
-      const asked = document.createElement('p');
-      asked.className = 'text-sm font-semibold';
-      asked.textContent = q.question;
-      const answer = document.createElement('p');
-      answer.className = 'text-sm text-muted';
-      answer.textContent = q.answer;
-      item.append(asked, answer);
-      return item;
-    }),
-  );
 }
 
-// Entrée envoie, Maj + Entrée passe à la ligne
-textarea.addEventListener('keydown', (event) => {
-  if (event.key === 'Enter' && !event.shiftKey) {
-    event.preventDefault();
-    form.requestSubmit();
-  }
-});
-
-form.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  const question = new FormData(form).get('question');
-  await fetch('/api/questions', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ question }),
-  });
-  form.reset();
-  await refresh();
-});
-
-refresh();
+checkHealth();
+initChat();

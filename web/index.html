@@ -105,23 +105,23 @@
       </div>
     </aside>
 
-    <main class="flex min-w-0 flex-1 flex-col">
+    <!-- data-mode vaut « home » (accueil de la maquette) ou « chat » (conversation, issue #20) -->
+    <main id="main" data-mode="home" class="group/main flex min-w-0 flex-1 flex-col">
       <header class="flex items-center justify-between gap-4 bg-header px-6 py-5 md:px-12">
         <h1 class="text-xl font-semibold">Nouveau chat</h1>
         <button
+          id="new-chat"
           type="button"
-          aria-disabled="true"
-          title="Bientôt disponible"
-          class="flex cursor-not-allowed items-center gap-2 rounded-control bg-surface px-4 py-2 text-sm font-semibold"
+          class="flex items-center gap-2 rounded-control bg-surface px-4 py-2 text-sm font-semibold hover:bg-panel focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <i data-lucide="message-square-more" class="size-4"></i>
           Nouveau chat
         </button>
       </header>
 
-      <div class="flex-1 overflow-y-auto px-6 py-12 md:px-12">
-        <div class="mx-auto flex max-w-4xl flex-col gap-10">
-          <section class="flex flex-col items-center gap-4 text-center">
+      <div id="content" class="flex-1 overflow-y-auto px-6 md:px-12">
+        <div class="mx-auto flex min-h-full max-w-4xl flex-col gap-10 pt-12 group-data-[mode=chat]/main:gap-6 group-data-[mode=chat]/main:pt-8">
+          <section class="flex flex-col items-center gap-4 text-center group-data-[mode=chat]/main:hidden">
             <h2 class="text-4xl font-bold">Hello <span class="text-primary">Jordan !</span></h2>
             <p class="max-w-sm text-sm">
               <strong class="font-semibold">Posez vos questions,</strong> explorez les possibilités et
@@ -129,44 +129,53 @@
             </p>
           </section>
 
-          <form class="flex flex-col gap-4 rounded-card bg-panel p-5">
-            <p class="flex items-center gap-2 text-sm font-semibold">
-              <i data-lucide="house" class="size-5 text-primary"></i>
-              Commencer le chat
-            </p>
-            <div class="flex flex-col gap-4 rounded-card bg-surface p-5">
-              <label for="question" class="sr-only">Votre question</label>
-              <textarea
-                id="question"
-                name="question"
-                rows="5"
-                required
-                placeholder="Comment est-ce que l'IA peut vous aider aujourd'hui ?"
-                class="w-full resize-none bg-transparent text-sm outline-none placeholder:text-text"
-              ></textarea>
-              <hr class="border-border" />
-              <div class="flex flex-wrap items-center gap-3">
-                <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
-                  Attach
-                </button>
-                <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
-                  Message vocal
-                </button>
-                <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
-                  Bibliothèque prompts
-                </button>
-                <button
-                  type="submit"
-                  class="ml-auto flex items-center gap-2 rounded-control bg-primary px-5 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none"
-                >
-                  <i data-lucide="sparkles" class="size-4"></i>
-                  Go
-                </button>
-              </div>
-            </div>
-          </form>
+          <ol
+            id="messages"
+            role="log"
+            aria-live="polite"
+            aria-label="Conversation avec le copilote"
+            class="flex flex-col gap-4 group-data-[mode=home]/main:hidden"
+          ></ol>
 
-          <ul id="questions" aria-label="Dernières questions" class="flex flex-col gap-3"></ul>
+          <!-- En conversation, la saisie reste collée en bas de l'écran, comme dans un chat -->
+          <div class="sticky bottom-0 bg-background pb-6 group-data-[mode=chat]/main:mt-auto">
+            <form class="flex flex-col gap-4 rounded-card bg-panel p-5">
+              <p class="flex items-center gap-2 text-sm font-semibold group-data-[mode=chat]/main:hidden">
+                <i data-lucide="house" class="size-5 text-primary"></i>
+                Commencer le chat
+              </p>
+              <div class="flex flex-col gap-4 rounded-card bg-surface p-5">
+                <label for="question" class="sr-only">Votre question</label>
+                <textarea
+                  id="question"
+                  name="question"
+                  required
+                  placeholder="Comment est-ce que l'IA peut vous aider aujourd'hui ?"
+                  class="h-28 w-full resize-none bg-transparent text-sm outline-none placeholder:text-text disabled:cursor-not-allowed group-data-[mode=chat]/main:h-12"
+                ></textarea>
+                <hr class="border-border" />
+                <div class="flex flex-wrap items-center gap-3">
+                  <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
+                    Attach
+                  </button>
+                  <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
+                    Message vocal
+                  </button>
+                  <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-2 rounded-control border border-text px-4 py-2 text-sm">
+                    Bibliothèque prompts
+                  </button>
+                  <button
+                    id="send"
+                    type="submit"
+                    class="ml-auto flex items-center gap-2 rounded-control bg-primary px-5 py-2 text-sm font-semibold text-on-primary hover:bg-primary-hover focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <i data-lucide="sparkles" class="size-4"></i>
+                    Go
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </main>
