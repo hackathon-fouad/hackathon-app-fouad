@@ -3,6 +3,7 @@ import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
 import '@fontsource/poppins/latin-700.css';
 import {
+  ArrowLeft,
   createIcons,
   Globe,
   House,
@@ -15,13 +16,15 @@ import {
   Sparkles,
 } from 'lucide';
 import { initChat } from './chat';
-import { showProspects } from './prospects';
-import { initRouter } from './router';
+import { showProspect } from './prospect';
+import { lastResultsHash, showProspects } from './prospects';
+import { initRouter, prospectsHash } from './router';
 import './style.css';
 
 // Remplace chaque <i data-lucide="…"> par son icône SVG, au trait fin comme la maquette
 createIcons({
   icons: {
+    ArrowLeft,
     Globe,
     House,
     Lightbulb,
@@ -90,4 +93,11 @@ initChat();
 initRouter({
   chat: () => {},
   prospects: (route) => void showProspects(route),
+  prospect: (route) => {
+    // Retour ramène à la grille d'où l'on vient, sinon à la recherche par défaut
+    document
+      .querySelector<HTMLAnchorElement>('#prospect-back')!
+      .setAttribute('href', lastResultsHash || prospectsHash('', 9));
+    void showProspect(route);
+  },
 });

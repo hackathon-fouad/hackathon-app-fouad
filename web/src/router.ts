@@ -2,14 +2,17 @@
 // sans bibliothèque de routage. Chaque écran est une section de index.html.
 //   #/                          le chat
 //   #/prospects?n=9&q=…         les résultats de prospection (issue #31)
+//   #/prospects/<id>            la fiche « Pourquoi cette entreprise ? » (issue #33)
 
 export type Route =
   | { view: 'chat' }
-  | { view: 'prospects'; query: string; limit: number };
+  | { view: 'prospects'; query: string; limit: number }
+  | { view: 'prospect'; id: string };
 
 const TITLES: Record<Route['view'], string> = {
   chat: 'Nouveau chat',
   prospects: 'Résultats de la recherche',
+  prospect: 'Pourquoi cette entreprise ?',
 };
 
 export function prospectsHash(query: string, limit: number): string {
@@ -19,6 +22,8 @@ export function prospectsHash(query: string, limit: number): string {
 
 export function parseRoute(hash: string): Route {
   const [path, search = ''] = hash.replace(/^#/, '').split('?');
+  const detail = path.match(/^\/prospects\/([a-z0-9-]{1,100})$/);
+  if (detail) return { view: 'prospect', id: detail[1] };
   if (path === '/prospects') {
     const params = new URLSearchParams(search);
     const limit = Number(params.get('n'));
@@ -43,6 +48,7 @@ export function navigate(hash: string) {
 type Screens = {
   chat: () => void;
   prospects: (route: { query: string; limit: number }) => void;
+  prospect: (route: { id: string }) => void;
 };
 
 export function initRouter(screens: Screens) {
@@ -51,6 +57,7 @@ export function initRouter(screens: Screens) {
   const views = {
     chat: document.querySelector<HTMLElement>('#view-chat')!,
     prospects: document.querySelector<HTMLElement>('#view-prospects')!,
+    prospect: document.querySelector<HTMLElement>('#view-prospect')!,
   };
 
   function render() {
@@ -63,6 +70,7 @@ export function initRouter(screens: Screens) {
     if (route.view === 'chat') homeLink.setAttribute('aria-current', 'page');
     else homeLink.removeAttribute('aria-current');
     if (route.view === 'prospects') screens.prospects(route);
+    else if (route.view === 'prospect') screens.prospect(route);
     else screens.chat();
   }
 

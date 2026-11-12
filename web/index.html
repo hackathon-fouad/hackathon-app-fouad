@@ -183,6 +183,16 @@
           <div id="prospects-status" class="flex flex-col items-center gap-3 text-sm text-muted"></div>
           <ol id="prospects-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></ol>
         </section>
+
+        <!-- Fiche « Pourquoi cette entreprise ? » (issue #33), remplie par web/src/prospect.ts -->
+        <section id="view-prospect" hidden aria-labelledby="page-title" class="mx-auto flex max-w-5xl flex-col gap-8 py-10">
+          <a id="prospect-back" href="#/" class="flex w-fit items-center gap-2 rounded-control text-sm font-semibold hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            Retour
+          </a>
+          <div id="prospect-status" class="flex flex-col items-center gap-3 text-sm text-muted"></div>
+          <div id="prospect-body" class="flex flex-col gap-8"></div>
+        </section>
       </div>
     </main>
     <script type="module" src="/src/main.ts"></script>

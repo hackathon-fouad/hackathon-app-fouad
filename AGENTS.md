@@ -38,6 +38,7 @@ Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` 
 - `web/src/chat.ts` : le chat avec le copilote (bulles, attente, erreur, historique envoyé à `POST /api/questions`). Pas d'affichage mot par mot simulé : le copilote répond d'un bloc.
 - `web/src/router.ts` : navigation par l'adresse (`#/`, `#/prospects?n=9&q=…`). Un nouvel écran = une section de `index.html` + une entrée dans le routeur, pas de bibliothèque de routage.
 - `web/src/prospects.ts` : l'écran « Résultats de la recherche », alimenté par `POST /api/prospects/search`. Le chat y envoie les demandes de prospection repérées par `prospectRequest()` (mots-clés : un verbe de recherche puis marques, prospects ou entreprises).
+- `web/src/prospect.ts` : la fiche « Pourquoi cette entreprise ? » (`#/prospects/<id>`), alimentée par `GET /api/prospects/{id}`. Les marques du copilote sont fictives : pas de logo ni de photo, les initiales et le détail du score les remplacent.
 - `web/src/style.css` : import de Tailwind et tokens du thème (`@theme`). Une nouvelle couleur ou un nouvel arrondi s'ajoute ici, puis s'utilise par son nom (`bg-primary`, `rounded-card`).
 - Icônes : `lucide`, sans framework. Écris `<i data-lucide="nom">` dans le HTML et ajoute l'icône à l'appel `createIcons` de `web/src/main.ts`. Police : Poppins, servie par `@fontsource/poppins` (pas de Google Fonts : la démo doit marcher hors ligne).
 - Les éléments de la maquette non branchés sur l'API portent `aria-disabled="true"` et `title="Bientôt disponible"`. Ne leur invente pas de comportement simulé.
