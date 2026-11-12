@@ -8,7 +8,8 @@ Tout se lance dans le Dev Container (ADR 0002). Les commandes ci-dessous s'exéc
 
 - N'installe jamais de dépendances depuis la machine hôte : `node_modules` recevrait des binaires macOS ou Windows et casserait le conteneur.
 - La base est le service `db` de `compose.yaml`, joignable sous `db:5432` (utilisateur, mot de passe et base : `app`). Client : `psql postgres://app:app@db:5432/app`.
-- La configuration de l'API est dans `api/.env`, copié depuis `api/.env.example`. Ne commite jamais `api/.env` et n'écris aucune clé dans le code.
+- En dev, la configuration de l'API est dans `api/.env`, copié depuis `api/.env.example`. Ne commite jamais `api/.env` et n'écris aucune clé dans le code.
+- `docker compose up` lance l'application complète, sans le Dev Container : front nginx sur :8080, API, Ollama et base. Ses variables sont dans `compose.yaml`.
 
 ## Commandes
 
@@ -20,6 +21,12 @@ npm run typecheck      # tsc --noEmit dans api/ et web/
 npm run build -w web   # build Vite du front
 ```
 
+Depuis la machine hôte, pour tester l'application telle qu'elle sera montrée :
+
+```bash
+docker compose up --build   # http://localhost:8080
+```
+
 Avant de proposer une modification, `npm run lint` et `npm run typecheck` doivent passer : le job `qualite` de `.github/workflows/ci.yml` lance les mêmes commandes.
 
 Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` de `package.json`) lance ESLint sur les fichiers indexés. Corrige l'erreur signalée au lieu de le contourner avec `--no-verify`.
@@ -27,7 +34,8 @@ Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` 
 ## Organisation du code
 
 - `api/src/index.ts` : l'API Express, les requêtes SQL avec `pg` et l'appel à l'IA (`ask()`).
-- `web/index.html` et `web/src/main.ts` : le front en TypeScript sans framework. Vite redirige `/api` vers l'API.
+- `web/index.html` et `web/src/main.ts` : le front en TypeScript sans framework. Vite redirige `/api` vers l'API en dev, nginx (`web/nginx.conf`) dans Compose.
+- `api/Dockerfile` et `web/Dockerfile` : les images de l'API et du front, construites depuis la racine du dépôt. Une dépendance ajoutée à un workspace n'a rien à changer ici.
 - `db/init/` : schéma (`001-schema.sql`) et données de test (`002-seed.sql`), joués seulement si `db/data/` est vide.
 - `openapi.yaml` : le contrat de l'API.
 - `docs/adr/` : les décisions d'architecture.

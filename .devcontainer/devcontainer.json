@@ -3,6 +3,8 @@
   // VS Code démarre toute la stack, puis s'attache au service « dev »
   "dockerComposeFile": ["../compose.yaml"],
   "service": "dev",
+  // Seulement le poste et la base : api, web et ollama servent à docker compose up
+  "runServices": ["dev", "db"],
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
   "remoteUser": "node",
