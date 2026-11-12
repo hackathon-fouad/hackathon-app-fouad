@@ -10,7 +10,7 @@ jobs:
   qualite:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Même version de Node que le Dev Container et la production
       - uses: actions/setup-node@v4
