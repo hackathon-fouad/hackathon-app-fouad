@@ -43,7 +43,7 @@ paths:
         '500':
           $ref: '#/components/responses/ServerError'
     post:
-      summary: Pose une question à l'IA et enregistre la réponse
+      summary: Pose une question au copilote IA et enregistre la réponse
       operationId: askQuestion
       requestBody:
         required: true
@@ -53,7 +53,7 @@ paths:
               $ref: '#/components/schemas/NewQuestion'
       responses:
         '201':
-          description: La question et la réponse de l'IA, telles qu'enregistrées.
+          description: La question et la réponse du copilote, telles qu'enregistrées.
           content:
             application/json:
               schema:
@@ -114,7 +114,7 @@ components:
   responses:
     ServerError:
       description: >
-        Erreur de la base ou du fournisseur d'IA. Express renvoie sa page
+        Erreur de la base ou du copilote IA. Express renvoie sa page
         d'erreur par défaut : le format n'est pas encore du JSON.
       content:
         text/html:

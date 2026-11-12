@@ -8,7 +8,7 @@ try {
   // Pas de .env : on garde l'environnement tel quel
 }
 
-const { DATABASE_URL, AI_BASE_URL, AI_MODEL, AI_API_KEY = '' } = process.env;
+const { DATABASE_URL, COPILOT_URL } = process.env;
 const PORT = Number(process.env.PORT ?? 3000);
 
 const db = new pg.Pool({ connectionString: DATABASE_URL });
@@ -41,24 +41,19 @@ app.post('/api/questions', async (req, res) => {
   res.status(201).json(rows[0]);
 });
 
-// Même appel pour Ollama, Mistral, OpenAI… : seule la configuration change
+// Le copilote de l'équipe data répond à partir de ses documents (ADR 0007).
+// Appel de serveur à serveur : le navigateur ne le voit pas, pas de CORS.
 async function ask(question: string): Promise<string> {
-  const response = await fetch(`${AI_BASE_URL}/chat/completions`, {
+  const response = await fetch(`${COPILOT_URL}/ask`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${AI_API_KEY}`,
-    },
-    body: JSON.stringify({
-      model: AI_MODEL,
-      messages: [{ role: 'user', content: question }],
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question }),
   });
   if (!response.ok) {
-    throw new Error(`IA : ${response.status} ${await response.text()}`);
+    throw new Error(`Copilote : ${response.status} ${await response.text()}`);
   }
-  const data = await response.json();
-  return data.choices[0].message.content;
+  const data = (await response.json()) as { answer: string };
+  return data.answer;
 }
 
 // Sans adresse, Node écoute sur toutes les interfaces : joignable hors du conteneur

@@ -1,6 +1,6 @@
 # 0003. Appeler l'IA via l'API compatible OpenAI, sans SDK
 
-- Statut : proposée
+- Statut : remplacée par [0007](0007-copilote-ia.md)
 - Date : 2026-11-09
 - Décideurs : Fouad
 
