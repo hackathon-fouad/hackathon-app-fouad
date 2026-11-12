@@ -40,10 +40,15 @@ services:
         COPY . .
         # Indexe story.txt dans ChromaDB, puis lance l'API sur toutes les interfaces
         CMD ["sh", "-c", "python ingest.py && uvicorn api:app --host 0.0.0.0 --port 8000"]
+    # Par défaut, l'Ollama de Compose (processeur seul). Pour l'Ollama du Mac, qui
+    # utilise la puce graphique : COPILOT_OLLAMA_HOST dans un .env à la racine (ADR 0008).
     environment:
-      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_HOST: ${COPILOT_OLLAMA_HOST:-http://ollama:11434}
       LLM_MODEL: llama3.2:3b
       EMBED_MODEL: nomic-embed-text
+    extra_hosts:
+      # Rend l'hôte joignable sous Linux (Docker Desktop le fait déjà)
+      - host.docker.internal:host-gateway
     depends_on:
       ollama-pull:
         condition: service_completed_successfully
