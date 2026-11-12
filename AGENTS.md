@@ -35,6 +35,7 @@ Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` 
 
 - `api/src/index.ts` : l'API Express, les requêtes SQL avec `pg` et l'appel à l'IA (`ask()`).
 - `web/index.html` et `web/src/main.ts` : le front en TypeScript sans framework. Vite redirige `/api` vers l'API en dev, nginx (`web/nginx.conf`) dans Compose.
+- `web/src/style.css` : import de Tailwind et tokens du thème (`@theme`). Une nouvelle couleur ou un nouvel arrondi s'ajoute ici, puis s'utilise par son nom (`bg-primary`, `rounded-card`).
 - `api/Dockerfile` et `web/Dockerfile` : les images de l'API et du front, construites depuis la racine du dépôt. Une dépendance ajoutée à un workspace n'a rien à changer ici.
 - `db/init/` : schéma (`001-schema.sql`) et données de test (`002-seed.sql`), joués seulement si `db/data/` est vide.
 - `openapi.yaml` : le contrat de l'API.
@@ -51,6 +52,7 @@ Les choix de `docs/adr/` sont actés. Toute réponse, tout code et toute command
 | 0003 | IA via `chat/completions` compatible OpenAI, avec `fetch` | SDK `openai` ou `@mistralai/mistralai`, LangChain |
 | 0004 | PostgreSQL 17 avec le driver `pg` | MySQL, MariaDB, SQLite, MongoDB, un ORM, une syntaxe SQL propre à un autre moteur |
 | 0005 | Contrat d'API écrit à la main dans `openapi.yaml` | Générer le contrat, ou le remplacer par une route `/docs` |
+| 0006 | Styles en Tailwind CSS 4, tokens dans `web/src/style.css` | CSS écrit à la main, Bootstrap, valeurs en dur comme `p-[13px]` ou `#4f46e5` dans les classes, noms de classes construits par concaténation |
 
 Si une demande semble exiger de sortir d'un ADR, ne l'applique pas : signale le conflit, cite l'ADR concerné, et propose d'écrire un nouvel ADR qui le remplace (modèle : `docs/adr/0000-modele.md`).
 
