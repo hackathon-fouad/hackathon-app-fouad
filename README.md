@@ -9,11 +9,26 @@ Une page web où l'on pose une question à une IA. L'API transmet la question à
 | API | Node 24, TypeScript, Express, `pg` | `api/` |
 | Front | Vite, TypeScript sans framework | `web/` |
 | Base | PostgreSQL 17 | `db/init/` (schéma et données de test) |
-| IA | API `chat/completions` compatible OpenAI | configurée dans `api/.env` |
+| IA | API `chat/completions` compatible OpenAI, Ollama par défaut | `compose.yaml`, ou `api/.env` en dev |
+| Service du front | nginx, qui relaie `/api` vers l'API | `web/Dockerfile`, `web/nginx.conf` |
 
 Les raisons de ces choix sont dans [`docs/adr/`](docs/adr/).
 
-## Lancer le projet
+## Lancer toute l'application
+
+Prérequis : Docker.
+
+```bash
+docker compose up
+```
+
+Ouvrir http://localhost:8080 et poser une question. Compose construit l'API et le front, démarre PostgreSQL et Ollama, puis l'API et le front.
+
+Le premier lancement télécharge le modèle `llama3.2:1b` (environ 1,3 Go) dans le volume `ollama`. Les lancements suivants le réutilisent. Le modèle tourne sur le processeur : une réponse peut prendre plusieurs secondes.
+
+Pour un autre fournisseur, par exemple Mistral, définir `AI_BASE_URL`, `AI_MODEL` et `AI_API_KEY` dans un fichier `.env` à la racine, jamais commité.
+
+## Développer
 
 Prérequis : Docker et VS Code avec l'extension Dev Containers.
 
