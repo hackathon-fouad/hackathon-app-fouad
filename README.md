@@ -1,6 +1,6 @@
 # Hackathon : questions à l'IA
 
-Une page web où l'on pose une question à une IA. L'API transmet la question à un modèle de langage compatible OpenAI (Ollama en local, ou Mistral), puis enregistre la question et la réponse dans PostgreSQL. La page affiche les dix dernières.
+Une page web où l'on pose une question à une IA. L'API transmet la question au copilote commercial de l'équipe data, qui répond à partir des documents de Givaudan, puis enregistre la question et la réponse dans PostgreSQL. La page affiche les dix dernières.
 
 ## Stack
 
@@ -9,7 +9,7 @@ Une page web où l'on pose une question à une IA. L'API transmet la question à
 | API | Node 24, TypeScript, Express, `pg` | `api/` |
 | Front | Vite, TypeScript sans framework | `web/` |
 | Base | PostgreSQL 17 | `db/init/` (schéma et données de test) |
-| IA | API `chat/completions` compatible OpenAI, Ollama par défaut | `compose.yaml`, ou `api/.env` en dev |
+| IA | Copilote de l'équipe data (FastAPI, ChromaDB, Ollama), appelé sur `POST /ask` | [`sergiovanni/Casque-projet_data`](https://github.com/sergiovanni/Casque-projet_data), service `copilot` de `compose.yaml` |
 | Service du front | nginx, qui relaie `/api` vers l'API | `web/Dockerfile`, `web/nginx.conf` |
 
 Les raisons de ces choix sont dans [`docs/adr/`](docs/adr/).
@@ -22,11 +22,11 @@ Prérequis : Docker.
 docker compose up
 ```
 
-Ouvrir http://localhost:8080 et poser une question. Compose construit l'API et le front, démarre PostgreSQL et Ollama, puis l'API et le front.
+Ouvrir http://localhost:8080 et poser une question. Compose construit l'API, le front et le copilote, démarre PostgreSQL et Ollama, indexe les documents du copilote, puis lance le reste.
 
-Le premier lancement télécharge le modèle `llama3.2:1b` (environ 1,3 Go) dans le volume `ollama`. Les lancements suivants le réutilisent. Le modèle tourne sur le processeur : une réponse peut prendre plusieurs secondes.
+Le premier lancement télécharge les modèles `llama3.2:3b` et `nomic-embed-text` (environ 2,3 Go) dans le volume `ollama`. Les lancements suivants les réutilisent. Le modèle tourne sur le processeur : une réponse peut prendre plusieurs dizaines de secondes.
 
-Pour un autre fournisseur, par exemple Mistral, définir `AI_BASE_URL`, `AI_MODEL` et `AI_API_KEY` dans un fichier `.env` à la racine, jamais commité.
+Le copilote est construit depuis son dépôt GitHub, figé sur un commit dans `compose.yaml`. Pour prendre une nouvelle version, changer ce commit par une pull request.
 
 ## Développer
 
@@ -36,7 +36,7 @@ Prérequis : Docker et VS Code avec l'extension Dev Containers.
 2. Dans le terminal du conteneur :
 
    ```bash
-   cp api/.env.example api/.env   # puis choisir le fournisseur d'IA
+   cp api/.env.example api/.env
    npm install
    npm run dev
    ```
@@ -49,7 +49,9 @@ Pour repartir d'une base vide, supprimer `db/data/` puis reconstruire le contene
 
 - `GET /api/health` : état de l'API et version de PostgreSQL.
 - `GET /api/questions` : les dix dernières questions.
-- `POST /api/questions` avec `{ "question": "..." }` : interroge l'IA et enregistre la réponse.
+- `POST /api/questions` avec `{ "question": "..." }` : interroge le copilote et enregistre la réponse.
+
+En dev, l'API a besoin du copilote : lancer `docker compose up -d copilot` depuis la machine hôte.
 
 ## Contribuer
 

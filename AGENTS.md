@@ -9,7 +9,7 @@ Tout se lance dans le Dev Container (ADR 0002). Les commandes ci-dessous s'exéc
 - N'installe jamais de dépendances depuis la machine hôte : `node_modules` recevrait des binaires macOS ou Windows et casserait le conteneur.
 - La base est le service `db` de `compose.yaml`, joignable sous `db:5432` (utilisateur, mot de passe et base : `app`). Client : `psql postgres://app:app@db:5432/app`.
 - En dev, la configuration de l'API est dans `api/.env`, copié depuis `api/.env.example`. Ne commite jamais `api/.env` et n'écris aucune clé dans le code.
-- `docker compose up` lance l'application complète, sans le Dev Container : front nginx sur :8080, API, Ollama et base. Ses variables sont dans `compose.yaml`.
+- `docker compose up` lance l'application complète, sans le Dev Container : front nginx sur :8080, API, copilote IA, Ollama et base. Ses variables sont dans `compose.yaml`.
 
 ## Commandes
 
@@ -33,7 +33,7 @@ Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` 
 
 ## Organisation du code
 
-- `api/src/index.ts` : l'API Express, les requêtes SQL avec `pg` et l'appel à l'IA (`ask()`).
+- `api/src/index.ts` : l'API Express, les requêtes SQL avec `pg` et l'appel au copilote (`ask()`).
 - `web/index.html` et `web/src/main.ts` : le front en TypeScript sans framework. Vite redirige `/api` vers l'API en dev, nginx (`web/nginx.conf`) dans Compose.
 - `web/src/style.css` : import de Tailwind et tokens du thème (`@theme`). Une nouvelle couleur ou un nouvel arrondi s'ajoute ici, puis s'utilise par son nom (`bg-primary`, `rounded-card`).
 - Icônes : `lucide`, sans framework. Écris `<i data-lucide="nom">` dans le HTML et ajoute l'icône à l'appel `createIcons` de `web/src/main.ts`. Police : Poppins, servie par `@fontsource/poppins` (pas de Google Fonts : la démo doit marcher hors ligne).
@@ -51,7 +51,7 @@ Les choix de `docs/adr/` sont actés. Toute réponse, tout code et toute command
 |---|---|---|
 | 0001 | TypeScript, API Express, front Vite sans framework | Python, NestJS, Fastify, React, Vue, Svelte |
 | 0002 | Tout tourne dans le Dev Container et `compose.yaml` | Installer Node, Postgres ou des outils sur la machine hôte |
-| 0003 | IA via `chat/completions` compatible OpenAI, avec `fetch` | SDK `openai` ou `@mistralai/mistralai`, LangChain |
+| 0007 | L'API appelle `POST {COPILOT_URL}/ask` du copilote de l'équipe data (remplace l'ADR 0003) | Appeler Ollama ou un autre LLM directement, SDK `openai`, LangChain, modifier ou copier le code du copilote dans ce dépôt |
 | 0004 | PostgreSQL 17 avec le driver `pg` | MySQL, MariaDB, SQLite, MongoDB, un ORM, une syntaxe SQL propre à un autre moteur |
 | 0005 | Contrat d'API écrit à la main dans `openapi.yaml` | Générer le contrat, ou le remplacer par une route `/docs` |
 | 0006 | Styles en Tailwind CSS 4, tokens dans `web/src/style.css` | CSS écrit à la main, Bootstrap, valeurs en dur comme `p-[13px]` ou `#4f46e5` dans les classes, noms de classes construits par concaténation |
@@ -62,7 +62,7 @@ Si une demande semble exiger de sortir d'un ADR, ne l'applique pas : signale le 
 
 - Toute route ajoutée ou modifiée dans `api/src/` doit l'être dans `openapi.yaml`, dans la même pull request (ADR 0005).
 - Les requêtes SQL passent toujours des paramètres (`$1`, `$2`), jamais de chaînes concaténées.
-- L'appel à l'IA est configuré par `AI_BASE_URL`, `AI_MODEL` et `AI_API_KEY` dans `api/.env` (ADR 0003).
+- L'adresse du copilote est `COPILOT_URL` (`api/.env` en dev, `compose.yaml` sinon). Son code vit dans `sergiovanni/Casque-projet_data` : une modification se propose à l'équipe data, puis on change le commit figé dans `compose.yaml` (ADR 0007).
 - Une modification du schéma va dans un nouveau fichier `db/init/00N-*.sql`, jamais dans un fichier existant.
 
 ## Git
