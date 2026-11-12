@@ -9,6 +9,8 @@
   --color-background: #ffffff;
   --color-sidebar: #da365e;
   --color-on-sidebar: #ffffff;
+  /* Blocs du menu et de la carte utilisateur, plus foncés que la barre */
+  --color-sidebar-strong: #b42c4e;
   --color-header: #e5e5e5;
   --color-panel: #f2f2f2;
   --color-surface: #ffffff;

@@ -15,6 +15,8 @@ import {
   Sparkles,
 } from 'lucide';
 import { initChat } from './chat';
+import { showProspects } from './prospects';
+import { initRouter } from './router';
 import './style.css';
 
 // Remplace chaque <i data-lucide="…"> par son icône SVG, au trait fin comme la maquette
@@ -85,3 +87,7 @@ async function checkHealth() {
 
 checkHealth();
 initChat();
+initRouter({
+  chat: () => {},
+  prospects: (route) => void showProspects(route),
+});

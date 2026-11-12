@@ -41,30 +41,29 @@
         />
       </label>
 
-      <nav aria-label="Navigation principale" class="flex flex-col gap-1">
+      <nav aria-label="Navigation principale" class="flex flex-col gap-2 rounded-card bg-sidebar-strong p-4 group-data-[collapsed=true]:p-1">
         <a
-          href="/"
+          id="nav-home"
+          href="#/"
           aria-current="page"
-          class="flex items-center gap-3 rounded-control px-0.5 py-2 text-sm font-medium focus-visible:ring-2 focus-visible:ring-on-sidebar focus-visible:outline-none"
+          class="flex items-center justify-center gap-3 rounded-control bg-surface px-0.5 py-2 text-sm font-semibold text-primary focus-visible:ring-2 focus-visible:ring-on-sidebar focus-visible:outline-none"
         >
           <i data-lucide="house" class="size-5 shrink-0"></i>
           <span class="group-data-[collapsed=true]:hidden">Accueil</span>
         </a>
-        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-0.5 py-2 text-sm">
+        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center justify-center gap-3 px-0.5 py-2 text-sm">
           <i data-lucide="globe" class="size-5 shrink-0"></i>
           <span class="group-data-[collapsed=true]:hidden">Mes clients</span>
         </button>
-        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-0.5 py-2 text-sm">
+        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center justify-center gap-3 px-0.5 py-2 text-sm">
           <i data-lucide="scan-eye" class="size-5 shrink-0"></i>
           <span class="group-data-[collapsed=true]:hidden">Insights</span>
         </button>
-        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-0.5 py-2 text-sm">
+        <button type="button" aria-disabled="true" title="Bientôt disponible" class="flex cursor-not-allowed items-center justify-center gap-3 px-0.5 py-2 text-sm">
           <i data-lucide="lightbulb" class="size-5 shrink-0"></i>
           <span class="group-data-[collapsed=true]:hidden">Solutions</span>
         </button>
       </nav>
-
-      <hr class="border-on-sidebar" />
 
       <ul aria-label="Catégories" class="flex flex-col gap-1">
         <li title="Bientôt disponible" class="flex cursor-not-allowed items-center gap-3 px-1 py-2 text-sm">
@@ -89,9 +88,8 @@
         </li>
       </ul>
 
-      <div class="mt-auto flex flex-col gap-4">
-        <hr class="border-on-sidebar" />
-        <div class="flex items-center gap-3">
+      <div class="flex flex-col gap-4">
+        <div class="flex items-center gap-3 rounded-card bg-sidebar-strong p-4 group-data-[collapsed=true]:bg-transparent group-data-[collapsed=true]:p-0">
           <span aria-hidden="true" class="size-10 shrink-0 rounded-full bg-on-sidebar"></span>
           <div class="min-w-0 group-data-[collapsed=true]:hidden">
             <p class="truncate text-sm font-semibold">Jordan Dubois</p>
@@ -105,10 +103,11 @@
       </div>
     </aside>
 
-    <!-- data-mode vaut « home » (accueil de la maquette) ou « chat » (conversation, issue #20) -->
+    <!-- data-mode vaut « home » (accueil de la maquette) ou « chat » (conversation, issue #20).
+         Chaque écran est une section : web/src/router.ts affiche celle qui correspond à l'adresse. -->
     <main id="main" data-mode="home" class="group/main flex min-w-0 flex-1 flex-col">
       <header class="flex items-center justify-between gap-4 bg-header px-6 py-5 md:px-12">
-        <h1 class="text-xl font-semibold">Nouveau chat</h1>
+        <h1 id="page-title" class="text-xl font-semibold">Nouveau chat</h1>
         <button
           id="new-chat"
           type="button"
@@ -120,7 +119,7 @@
       </header>
 
       <div id="content" class="flex-1 overflow-y-auto px-6 md:px-12">
-        <div class="mx-auto flex min-h-full max-w-4xl flex-col gap-10 pt-12 group-data-[mode=chat]/main:gap-6 group-data-[mode=chat]/main:pt-8">
+        <div id="view-chat" class="mx-auto flex min-h-full max-w-4xl flex-col gap-10 pt-12 group-data-[mode=chat]/main:gap-6 group-data-[mode=chat]/main:pt-8">
           <section class="flex flex-col items-center gap-4 text-center group-data-[mode=chat]/main:hidden">
             <h2 class="text-4xl font-bold">Hello <span class="text-primary">Jordan !</span></h2>
             <p class="max-w-sm text-sm">
@@ -177,6 +176,13 @@
             </form>
           </div>
         </div>
+
+        <!-- Résultats de prospection (issue #31), remplis par web/src/prospects.ts -->
+        <section id="view-prospects" hidden aria-labelledby="page-title" class="mx-auto flex max-w-5xl flex-col gap-6 py-10">
+          <p id="prospects-intro" class="text-center text-sm font-semibold"></p>
+          <div id="prospects-status" class="flex flex-col items-center gap-3 text-sm text-muted"></div>
+          <ol id="prospects-grid" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></ol>
+        </section>
       </div>
     </main>
     <script type="module" src="/src/main.ts"></script>
