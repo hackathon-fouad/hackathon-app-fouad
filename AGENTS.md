@@ -36,6 +36,8 @@ Un hook `pre-commit` (`.husky/pre-commit`, configuré par la clé `lint-staged` 
 - `api/src/index.ts` : l'API Express, les requêtes SQL avec `pg` et l'appel à l'IA (`ask()`).
 - `web/index.html` et `web/src/main.ts` : le front en TypeScript sans framework. Vite redirige `/api` vers l'API en dev, nginx (`web/nginx.conf`) dans Compose.
 - `web/src/style.css` : import de Tailwind et tokens du thème (`@theme`). Une nouvelle couleur ou un nouvel arrondi s'ajoute ici, puis s'utilise par son nom (`bg-primary`, `rounded-card`).
+- Icônes : `lucide`, sans framework. Écris `<i data-lucide="nom">` dans le HTML et ajoute l'icône à l'appel `createIcons` de `web/src/main.ts`. Police : Poppins, servie par `@fontsource/poppins` (pas de Google Fonts : la démo doit marcher hors ligne).
+- Les éléments de la maquette non branchés sur l'API portent `aria-disabled="true"` et `title="Bientôt disponible"`. Ne leur invente pas de comportement simulé.
 - `api/Dockerfile` et `web/Dockerfile` : les images de l'API et du front, construites depuis la racine du dépôt. Une dépendance ajoutée à un workspace n'a rien à changer ici.
 - `db/init/` : schéma (`001-schema.sql`) et données de test (`002-seed.sql`), joués seulement si `db/data/` est vide.
 - `openapi.yaml` : le contrat de l'API.
