@@ -3,20 +3,16 @@ import '@fontsource/poppins/latin-500.css';
 import '@fontsource/poppins/latin-600.css';
 import '@fontsource/poppins/latin-700.css';
 import {
-  BookOpen,
   createIcons,
   Globe,
   House,
   Lightbulb,
-  MessagesSquare,
-  Mic,
+  MessageSquareMore,
   PanelLeftClose,
   PanelLeftOpen,
-  Paperclip,
   ScanEye,
   Search,
-  SendHorizontal,
-  SquarePen,
+  Sparkles,
 } from 'lucide';
 import './style.css';
 
@@ -25,19 +21,15 @@ type Question = { id: number; question: string; answer: string };
 // Remplace chaque <i data-lucide="…"> par son icône SVG, au trait fin comme la maquette
 createIcons({
   icons: {
-    BookOpen,
     Globe,
     House,
     Lightbulb,
-    MessagesSquare,
-    Mic,
+    MessageSquareMore,
     PanelLeftClose,
     PanelLeftOpen,
-    Paperclip,
     ScanEye,
     Search,
-    SendHorizontal,
-    SquarePen,
+    Sparkles,
   },
   attrs: { 'stroke-width': 1.5 },
 });
@@ -87,7 +79,7 @@ toggle.addEventListener('click', () =>
 async function refresh() {
   try {
     const status = await fetch('/api/health').then((r) => r.json());
-    healthDot.classList.replace('bg-muted', 'bg-success');
+    healthDot.classList.replace('bg-on-sidebar/50', 'bg-success');
     healthText.textContent = 'API connectée';
     healthText.setAttribute('title', status.db);
   } catch {
