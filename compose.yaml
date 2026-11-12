@@ -17,19 +17,46 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
-    # api/.env n'est pas commité : la configuration vient d'ici. Pour un autre
-    # fournisseur d'IA, définir AI_BASE_URL, AI_MODEL et AI_API_KEY dans le shell
-    # ou dans un fichier .env à la racine (ADR 0003).
+    # api/.env n'est pas commité : la configuration vient d'ici
     environment:
       DATABASE_URL: postgres://app:app@db:5432/app
-      AI_BASE_URL: ${AI_BASE_URL:-http://ollama:11434/v1}
-      AI_MODEL: ${AI_MODEL:-llama3.2:1b}
-      AI_API_KEY: ${AI_API_KEY:-}
+      COPILOT_URL: http://copilot:8000
     depends_on:
       db:
         condition: service_healthy
+      copilot:
+        condition: service_healthy
+
+  # Le copilote de l'équipe data (ADR 0007), construit depuis son dépôt GitHub sans
+  # le modifier. Figé sur un commit : pour prendre ses nouveautés, changer le SHA par PR.
+  copilot:
+    build:
+      context: https://github.com/sergiovanni/Casque-projet_data.git#76be150c1cee189366098acaa914583f27dc1c1a
+      dockerfile_inline: |
+        FROM python:3.12-slim
+        WORKDIR /app
+        COPY requirements.txt .
+        RUN pip install --no-cache-dir -r requirements.txt
+        COPY . .
+        # Indexe story.txt dans ChromaDB, puis lance l'API sur toutes les interfaces
+        CMD ["sh", "-c", "python ingest.py && uvicorn api:app --host 0.0.0.0 --port 8000"]
+    # Par défaut, l'Ollama de Compose (processeur seul). Pour l'Ollama du Mac, qui
+    # utilise la puce graphique : COPILOT_OLLAMA_HOST dans un .env à la racine (ADR 0008).
+    environment:
+      OLLAMA_HOST: ${COPILOT_OLLAMA_HOST:-http://ollama:11434}
+      LLM_MODEL: llama3.2:3b
+      EMBED_MODEL: nomic-embed-text
+    extra_hosts:
+      # Rend l'hôte joignable sous Linux (Docker Desktop le fait déjà)
+      - host.docker.internal:host-gateway
+    depends_on:
       ollama-pull:
         condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
 
   # L'IA en local, sans clé ni quota. Les modèles restent dans le volume ollama.
   ollama:
@@ -42,13 +69,13 @@ services:
       timeout: 5s
       retries: 20
 
-  # Télécharge le modèle au premier lancement (environ 1,3 Go), puis s'arrête.
-  # Les lancements suivants le trouvent déjà dans le volume.
+  # Télécharge les modèles du copilote au premier lancement (environ 2,3 Go),
+  # puis s'arrête. Les lancements suivants les trouvent déjà dans le volume.
   ollama-pull:
     image: ollama/ollama:0.40.16
     environment:
       OLLAMA_HOST: ollama:11434
-    command: ["pull", "${AI_MODEL:-llama3.2:1b}"]
+    entrypoint: ["sh", "-c", "ollama pull llama3.2:3b && ollama pull nomic-embed-text"]
     depends_on:
       ollama:
         condition: service_healthy

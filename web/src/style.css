@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+/* Tokens du thème (ADR 0006), tirés de la maquette Figma « Nouveau chat » v2.
+   Les classes les utilisent par leur nom : bg-sidebar, text-muted, rounded-card…
+   Jamais de valeur en dur dans les classes. */
+@theme {
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+
+  --color-background: #ffffff;
+  --color-sidebar: #da365e;
+  --color-on-sidebar: #ffffff;
+  /* Blocs du menu et de la carte utilisateur, plus foncés que la barre */
+  --color-sidebar-strong: #b42c4e;
+  --color-header: #e5e5e5;
+  --color-panel: #f2f2f2;
+  --color-surface: #ffffff;
+  --color-border: #d4d4d4;
+  --color-text: #323232;
+  --color-muted: #6b6b6b;
+  /* Rose Givaudan. Blanc dessus : contraste 4,5, le minimum WCAG AA */
+  --color-primary: #da365e;
+  --color-primary-hover: #c02a4f;
+  --color-on-primary: #ffffff;
+  --color-success: #16a34a;
+
+  --radius-card: 0.5rem;
+  --radius-control: 0.375rem;
+}
