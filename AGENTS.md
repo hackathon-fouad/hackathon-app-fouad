@@ -52,6 +52,7 @@ Les choix de `docs/adr/` sont actés. Toute réponse, tout code et toute command
 | 0001 | TypeScript, API Express, front Vite sans framework | Python, NestJS, Fastify, React, Vue, Svelte |
 | 0002 | Tout tourne dans le Dev Container et `compose.yaml` | Installer Node, Postgres ou des outils sur la machine hôte |
 | 0007 | L'API appelle `POST {COPILOT_URL}/ask` du copilote de l'équipe data (remplace l'ADR 0003) | Appeler Ollama ou un autre LLM directement, SDK `openai`, LangChain, modifier ou copier le code du copilote dans ce dépôt |
+| 0008 | Le copilote vise l'Ollama de Compose, ou celui de l'hôte via `COPILOT_OLLAMA_HOST` | Rendre l'Ollama de l'hôte obligatoire, retirer le service `ollama` de Compose |
 | 0004 | PostgreSQL 17 avec le driver `pg` | MySQL, MariaDB, SQLite, MongoDB, un ORM, une syntaxe SQL propre à un autre moteur |
 | 0005 | Contrat d'API écrit à la main dans `openapi.yaml` | Générer le contrat, ou le remplacer par une route `/docs` |
 | 0006 | Styles en Tailwind CSS 4, tokens dans `web/src/style.css` | CSS écrit à la main, Bootstrap, valeurs en dur comme `p-[13px]` ou `#4f46e5` dans les classes, noms de classes construits par concaténation |
@@ -62,6 +63,7 @@ Si une demande semble exiger de sortir d'un ADR, ne l'applique pas : signale le 
 
 - Toute route ajoutée ou modifiée dans `api/src/` doit l'être dans `openapi.yaml`, dans la même pull request (ADR 0005).
 - Les requêtes SQL passent toujours des paramètres (`$1`, `$2`), jamais de chaînes concaténées.
+- Le copilote utilise l'Ollama de Compose, ou celui de la machine hôte si `COPILOT_OLLAMA_HOST` est défini dans `.env` à la racine (ADR 0008). Ne retire pas la valeur par défaut : `docker compose up` doit marcher sans `.env`.
 - L'adresse du copilote est `COPILOT_URL` (`api/.env` en dev, `compose.yaml` sinon). Son code vit dans `sergiovanni/Casque-projet_data` : une modification se propose à l'équipe data, puis on change le commit figé dans `compose.yaml` (ADR 0007).
 - Une modification du schéma va dans un nouveau fichier `db/init/00N-*.sql`, jamais dans un fichier existant.
 

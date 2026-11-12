@@ -24,7 +24,20 @@ docker compose up
 
 Ouvrir http://localhost:8080 et poser une question. Compose construit l'API, le front et le copilote, démarre PostgreSQL et Ollama, indexe les documents du copilote, puis lance le reste.
 
-Le premier lancement télécharge les modèles `llama3.2:3b` et `nomic-embed-text` (environ 2,3 Go) dans le volume `ollama`. Les lancements suivants les réutilisent. Le modèle tourne sur le processeur : une réponse peut prendre plusieurs dizaines de secondes.
+Le premier lancement télécharge les modèles `llama3.2:3b` et `nomic-embed-text` (environ 2,3 Go) dans le volume `ollama`. Les lancements suivants les réutilisent. Le modèle tourne sur le processeur : une réponse peut prendre une à deux minutes.
+
+### Réponses plus rapides sur Mac
+
+Docker sur Mac n'utilise pas la puce graphique. Ollama installé sur le Mac, lui, l'utilise (ADR 0008) :
+
+```bash
+ollama pull llama3.2:3b
+ollama pull nomic-embed-text
+echo "COPILOT_OLLAMA_HOST=http://host.docker.internal:11434" > .env
+docker compose up -d
+```
+
+Le fichier `.env` à la racine n'est pas commité. Le supprimer pour revenir à l'Ollama de Compose.
 
 Le copilote est construit depuis son dépôt GitHub, figé sur un commit dans `compose.yaml`. Pour prendre une nouvelle version, changer ce commit par une pull request.
 
